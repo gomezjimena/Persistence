@@ -4,8 +4,17 @@
  */
 package persistence;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  *
@@ -23,8 +32,69 @@ public class ModelProductsTable extends AbstractTableModel{
         return products;
     }
     
+    public void readInformation() {
+        JSONParser parser = new JSONParser();
+        try {
+            Object obj = parser.parse(new FileReader("Products.json"));
+            JSONObject jsonObject = (JSONObject) obj;
+            JSONArray productsArray = (JSONArray) jsonObject.get("list");
+
+            for(int i = 0; i < productsArray.size(); i++) {
+                Product product = new Product();
+                JSONObject objectProductJSON = (JSONObject) productsArray.get(i);
+
+                product.setProductId(((Long) objectProductJSON.get("Product Id")).intValue());
+                product.setName((String) objectProductJSON.get("Name"));
+                product.setPrice(Double.parseDouble((String) objectProductJSON.get("Price")));
+                product.setStock(((Long) objectProductJSON.get("Stock")).intValue());
+
+                this.products.add(product);   
+            }
+        } catch(FileNotFoundException ex) {
+            System.out.println("Error reading product file (FNF)" + ex);
+        } catch(IOException ex) {
+            System.out.println("Error reading product file (IOS)" + ex);
+        } catch(ParseException ex) {
+            System.out.println("Error reading product file (PE)" + ex);
+        }
+    }
+
+    
+    public void WriteInformation(){
+        if(!products.isEmpty()){
+            
+            JSONObject productsJSON = new JSONObject();
+            JSONArray list = new JSONArray();
+            
+            for(int i = 0; i < products.size(); i++){
+                
+                JSONObject objtJSON = new JSONObject();
+                
+                objtJSON.put("Product Id", products.get(i).getProductId());
+                objtJSON.put("Name", products.get(i).getName());
+                objtJSON.put("Price", products.get(i).getPrice());
+                objtJSON.put("Stock", products.get(i).getStock());
+                
+                list.add(objtJSON);
+            }
+            
+            productsJSON.put("list", list);
+            
+            try(FileWriter file = new FileWriter("Products.json")){
+                file.write(productsJSON.toString());
+                file.flush();
+            }catch (IOException ex){
+                System.out.println("Error writing JSON file information " + ex);
+            }
+        }
+    }
+    
     public void addProduct(Product product){
         this.products.add(product);
+        //File file = new File("Products.json");
+        //if (file.exists()){
+          //  readInformation();
+        //}
         this.fireTableDataChanged();
     }
     

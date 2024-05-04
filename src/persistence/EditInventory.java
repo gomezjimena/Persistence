@@ -29,6 +29,7 @@ public final class EditInventory extends javax.swing.JFrame {
     
     public EditInventory() {
         initComponents();
+        saveChanges();
         this.setCurrentInventory(null);
         initObjects();
         this.setLocationRelativeTo(null);
@@ -36,6 +37,7 @@ public final class EditInventory extends javax.swing.JFrame {
 
     public EditInventory(List<Product> editInventorylist) {
         initComponents();
+        saveChanges();
         this.setCurrentInventory(editInventorylist);
         initObjects();
         this.setLocationRelativeTo(null);
@@ -202,6 +204,14 @@ public final class EditInventory extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void saveChanges() {
+        ModelEditTable model = (ModelEditTable) tbl_edit.getModel();
+        List<Product> editedProducts = model.getProducts();
+        ModelProductsTable inventoryModel = new ModelProductsTable(editedProducts);
+        inventoryModel.WriteInformation();
+    }
+
+    
     private void btn_discardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_discardActionPerformed
         Inventory edit = new Inventory(this.getCurrentInventory());
         edit.setVisible(true);
@@ -209,6 +219,7 @@ public final class EditInventory extends javax.swing.JFrame {
     }//GEN-LAST:event_btn_discardActionPerformed
 
     private void btn_saveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_saveActionPerformed
+        saveChanges();
         Inventory edit = new Inventory(this.editInventoryList);
         edit.setVisible(true);
         this.setVisible(false);
@@ -245,7 +256,7 @@ public final class EditInventory extends javax.swing.JFrame {
         }
         if (!stockText.isEmpty()) {
             try {
-                Integer stock = Integer.parseInt(stockText);
+                Integer stock = Integer.valueOf(stockText);
                 product.setStock(stock);
                 tbl_edit.setValueAt(stock, fila, 2);
                 txt_stock.setText("");

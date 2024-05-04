@@ -34,6 +34,7 @@ public final class Inventory extends javax.swing.JFrame {
     public Inventory() {
         initComponents();
         initObjects();
+        saveInformation();
         empty();
         numericalEmpty();
         this.setProducts2(null);
@@ -44,6 +45,7 @@ public final class Inventory extends javax.swing.JFrame {
         initComponents();
         this.setProducts2(editInventory);
         initObjects();
+        saveInformation();
         empty();
         numericalEmpty();
         this.setLocationRelativeTo(null);
@@ -234,6 +236,11 @@ public final class Inventory extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void saveInformation() {
+        ModelProductsTable model = (ModelProductsTable) tbl_products.getModel();
+        model.WriteInformation();
+    }
+    
     private void btn_addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_addActionPerformed
         if (txt_name.getText().isEmpty() || txt_price.getText().isEmpty() || txt_stock.getText().isEmpty() ) {
         JOptionPane.showMessageDialog(this, "Fill out all the product information.",
@@ -256,8 +263,9 @@ public final class Inventory extends javax.swing.JFrame {
             product.setStock(stock); 
             
             teamModel.addProduct(product);
-            
             empty();
+            
+            saveInformation(); 
             
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Price and stock must be numeric values.",
@@ -307,6 +315,7 @@ public final class Inventory extends javax.swing.JFrame {
         }
         if (indexToRemove != -1) {
             teamModel.removeProduct(indexToRemove);
+            saveInformation();
         }
         
         txt_name.setText("");
@@ -315,6 +324,7 @@ public final class Inventory extends javax.swing.JFrame {
     private void btn_deleteallActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_deleteallActionPerformed
         ModelProductsTable productModel = (ModelProductsTable) this.tbl_products.getModel();
         productModel.removeAll();
+        
     }//GEN-LAST:event_btn_deleteallActionPerformed
 
     private void btn_editActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_editActionPerformed
@@ -330,6 +340,7 @@ public final class Inventory extends javax.swing.JFrame {
             edit.setVisible(true);
             this.setVisible(false);
         }
+        
     }//GEN-LAST:event_btn_editActionPerformed
 
     /**
