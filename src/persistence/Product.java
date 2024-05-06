@@ -28,7 +28,7 @@ public class Product {
      * @return the productId
      */
     public Integer getProductId() {
-        return productId;
+        return productId != null ? productId.intValue() : 0;
     }
 
     /**

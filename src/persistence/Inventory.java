@@ -15,65 +15,30 @@ import javax.swing.table.TableRowSorter;
  * @author Lenovo
  */
 public final class Inventory extends javax.swing.JFrame {
-    List<Product> products ;
     List<Product> productsl = new ArrayList<>();
-    List<Product> products2;
     TableRowSorter<ModelProductsTable> tableRowSorter = new TableRowSorter<>();
-
-    public List<Product> getProducts2() {
-        return products2;
-    }
-
-    public void setProducts2(List<Product> products2) {
-        this.products2 = products2;
-    }
     
     /**
      * Creates new form Inventory
      */
     public Inventory() {
         initComponents();
+        setLocationRelativeTo(null);
         initObjects();
         saveInformation();
         empty();
         numericalEmpty();
-        this.setProducts2(null);
-        this.setLocationRelativeTo(null);
     }
     
-    public Inventory(List<Product> editInventory) {
-        initComponents();
-        this.setProducts2(editInventory);
-        initObjects();
-        saveInformation();
-        empty();
-        numericalEmpty();
-        this.setLocationRelativeTo(null);
-    }
-
     private void initObjects() {
-        if(this.getProducts2() == null){
-            ModelProductsTable model = new ModelProductsTable(this.productsl);
-            tableRowSorter = new TableRowSorter<>(model);
-
-            tbl_products.setRowSorter(tableRowSorter);
-            tbl_products.setModel(model);
-        }else{
-            products = new ArrayList<>();
+        ModelProductsTable model = new ModelProductsTable(productsl);
+        model.readInformation();
         
-            for (int i = 0; i < this.getProducts2().size(); i++) { 
-                Product editInformation = new Product(i + 1, this.getProducts2().get(i).getName(), 
-                     this.getProducts2().get(i).getPrice(), this.getProducts2().get(i).getStock());            
-                products.add(editInformation);
-            }
-        
-        ModelProductsTable model = new ModelProductsTable(this.products);
         tableRowSorter = new TableRowSorter<>(model);
-        
         tbl_products.setModel(model);
         tbl_products.setRowSorter(tableRowSorter);
-        }
-    }
+       
+    }    
     
     private void empty(){
         txt_name.setText("");
@@ -237,7 +202,7 @@ public final class Inventory extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void saveInformation() {
-        ModelProductsTable model = (ModelProductsTable) tbl_products.getModel();
+        ModelProductsTable model = new ModelProductsTable(productsl);
         model.WriteInformation();
     }
     
@@ -263,9 +228,9 @@ public final class Inventory extends javax.swing.JFrame {
             product.setStock(stock); 
             
             teamModel.addProduct(product);
-            empty();
             
-            saveInformation(); 
+            empty();
+            saveInformation();
             
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Price and stock must be numeric values.",
@@ -302,7 +267,7 @@ public final class Inventory extends javax.swing.JFrame {
         String productNameToRemove = txt_name.getText();
         
         ModelProductsTable teamModel = (ModelProductsTable) tbl_products.getModel();
-    
+        
         List<Product> productList = teamModel.getProducts();
         
         int indexToRemove = -1;
@@ -322,25 +287,54 @@ public final class Inventory extends javax.swing.JFrame {
     }//GEN-LAST:event_btn_deleteActionPerformed
 
     private void btn_deleteallActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_deleteallActionPerformed
-        ModelProductsTable productModel = (ModelProductsTable) this.tbl_products.getModel();
-        productModel.removeAll();
-        
+        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete all products?", "Confirm Delete All", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            ModelProductsTable productModel = (ModelProductsTable) this.tbl_products.getModel();
+            productModel.removeAll();
+            saveInformation();
+        }
     }//GEN-LAST:event_btn_deleteallActionPerformed
 
     private void btn_editActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_editActionPerformed
-        if (productsl.isEmpty() && this.products == null) {
-            JOptionPane.showMessageDialog(this, "There are no products to edit.",
-                "Empty inventory", JOptionPane.ERROR_MESSAGE);
-        } else if (this.products != null){
-            EditInventory edit = new EditInventory(this.products);
-            edit.setVisible(true);
-            this.setVisible(false);
+        String name = txt_name.getText();
+        String priceText = txt_price.getText(); 
+        String stockText = txt_stock.getText(); 
+        int fila = tbl_products.getSelectedRow();
+
+        if (fila == -1) {
+        JOptionPane.showMessageDialog(this, "Please select a row to edit.", 
+                "No row selected", JOptionPane.WARNING_MESSAGE);
+    } else {
+            ModelProductsTable model = (ModelProductsTable) tbl_products.getModel();
+
+        Product product = model.getProductAtRow(fila);
+
+        if (!name.isEmpty()) {
+            product.setName(name);
+            tbl_products.setValueAt(name, fila, 0);
+            txt_name.setText("");
         }
-        else {EditInventory edit = new EditInventory(this.productsl);
-            edit.setVisible(true);
-            this.setVisible(false);
+        if (!priceText.isEmpty()) {
+            try {
+                double price = Double.parseDouble(priceText);
+                product.setPrice(price);
+                tbl_products.setValueAt(price, fila, 1);
+                txt_price.setText("");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid price format.", "Invalid input", JOptionPane.ERROR_MESSAGE);
+            }
         }
-        
+        if (!stockText.isEmpty()) {
+            try {
+                Integer stock = Integer.valueOf(stockText);
+                product.setStock(stock);
+                tbl_products.setValueAt(stock, fila, 2);
+                txt_stock.setText("");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid stock format.", "Invalid input", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        }
     }//GEN-LAST:event_btn_editActionPerformed
 
     /**

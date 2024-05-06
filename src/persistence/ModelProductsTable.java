@@ -4,7 +4,6 @@
  */
 package persistence;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -22,12 +21,23 @@ import org.json.simple.parser.ParseException;
  */
 public class ModelProductsTable extends AbstractTableModel{
     List<Product> products;
+    private Integer productIdCounter;
     String[] columnNames = {"Product Id","Name","Price" ,"Stock"};
 
     public ModelProductsTable(List<Product> products) {
         this.products = products;
+        this.productIdCounter = calculateMaxProductId() + 1;
     }
     
+    private int calculateMaxProductId() {
+        int maxId = 0;
+        for (Product product : products) {
+            if (product.getProductId() > maxId) { 
+            }
+        }
+        return maxId;
+    }
+
     public List<Product> getProducts() {
         return products;
     }
@@ -45,11 +55,14 @@ public class ModelProductsTable extends AbstractTableModel{
 
                 product.setProductId(((Long) objectProductJSON.get("Product Id")).intValue());
                 product.setName((String) objectProductJSON.get("Name"));
-                product.setPrice(Double.parseDouble((String) objectProductJSON.get("Price")));
+                product.setPrice((Double) objectProductJSON.get("Price"));
                 product.setStock(((Long) objectProductJSON.get("Stock")).intValue());
 
                 this.products.add(product);   
             }
+            
+            adjustProductIdCounter();
+        
         } catch(FileNotFoundException ex) {
             System.out.println("Error reading product file (FNF)" + ex);
         } catch(IOException ex) {
@@ -58,7 +71,14 @@ public class ModelProductsTable extends AbstractTableModel{
             System.out.println("Error reading product file (PE)" + ex);
         }
     }
-
+    
+    private void adjustProductIdCounter() {
+        for (Product product : products) {
+            if (product.getProductId() >= productIdCounter) {
+                productIdCounter = product.getProductId() + 1;
+            }
+        }
+    }
     
     public void WriteInformation(){
         if(!products.isEmpty()){
@@ -90,28 +110,27 @@ public class ModelProductsTable extends AbstractTableModel{
     }
     
     public void addProduct(Product product){
-        this.products.add(product);
-        //File file = new File("Products.json");
-        //if (file.exists()){
-          //  readInformation();
-        //}
+        product.setProductId(productIdCounter); 
+        products.add(product);
+        productIdCounter++;
         this.fireTableDataChanged();
     }
     
     public void removeProduct(int rowIndex) {
-    if (rowIndex >= 0 && rowIndex < products.size()) {
-        products.remove(rowIndex);
-        
-        for (int i = rowIndex; i < products.size(); i++) {
-            products.get(i).setProductId(i + 1); 
+        if (rowIndex >= 0 && rowIndex < products.size()) {
+            products.remove(rowIndex);
+
+            for (int i = rowIndex; i < products.size(); i++) {
+                products.get(i).setProductId(products.get(i).getProductId() - 1);
+            }
+            productIdCounter = productIdCounter - 1;
+            fireTableRowsDeleted(rowIndex, rowIndex);
         }
-        
-        fireTableRowsDeleted(rowIndex, rowIndex);
-    }
     }
     
     public void removeAll(){
         this.products.removeAll(products);
+        productIdCounter = 1;
         this.fireTableDataChanged();
     }
     
@@ -142,9 +161,18 @@ public class ModelProductsTable extends AbstractTableModel{
         };
     }
 
+    public Product getProductAtRow(int rowIndex) {
+        
+        if (rowIndex >= 0 && rowIndex < products.size()) {
+            return products.get(rowIndex); 
+        } else {
+            return null; 
+        }
+    }
+    
     @Override
     public boolean isCellEditable(int row, int column) {
-        return false;
+        return column != 0;
     }
 
     @Override
