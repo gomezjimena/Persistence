@@ -287,7 +287,10 @@ public final class Inventory extends javax.swing.JFrame {
     }//GEN-LAST:event_btn_deleteActionPerformed
 
     private void btn_deleteallActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_deleteallActionPerformed
-        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete all products?", "Confirm Delete All", JOptionPane.YES_NO_OPTION);
+        Object[] options = {"Yes", "No"};
+        int confirm = JOptionPane.showOptionDialog(this, "Are you sure you want to delete all products?",
+                "Confirm Delete All", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+                null, options, options[1]);
         if (confirm == JOptionPane.YES_OPTION) {
             ModelProductsTable productModel = (ModelProductsTable) this.tbl_products.getModel();
             productModel.removeAll();
